@@ -8,8 +8,7 @@ const dataRoutes = require('./routes/dataRoutes')
 
 // Connect to MongoDB
 // Store this in a .env file
-const uri = 'mongodb+srv://michellenevans:O3aeqOQ4Fc8lJqye@cluster0.faju1j1.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
-// const uri = 'mongodb+srv://[get specific url from your mongo account].mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+const uri = 'mongodb+srv://[get specific url from your mongo account].mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
 const client = new MongoClient(uri)
 const dbName = 'myDatabase'
 const colName = 'myCollection'
