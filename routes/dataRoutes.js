@@ -1,13 +1,35 @@
+    const { ObjectId } = require("mongodb")
     const express = require('express')
     const router = express.Router()
 
     const options = { returnDocument: 'after' } // Return the updated document
     
-    router.get('/:id', async (req, res) => {   
+    router.get('/search/:id/:searchTerm', async (req, res) => {   
       const collection = req.collection
-      const { id } = req.params
-      const data = await collection.find({ id: id })
-      res.json(data)
+      const { id, searchTerm } = req.params
+      const data = await collection.find(
+        { 
+        _id: new ObjectId(id),
+        'jobs.company': { $regex: searchTerm, $options: 'i' }
+        },
+        {
+          projection: {
+            _id: 1,
+            jobs: {
+              $filter: {
+                input: '$jobs',
+                as: 'job',
+                cond: { $regexMatch: { input: '$$job.company', regex: searchTerm, options: 'i' } }
+              }
+            }
+          }
+        }
+      ).toArray()
+      if (data[0] && data[0].jobs) {
+        res.json(data[0].jobs)
+      } else {
+        res.json([])
+      }
     })
     // Update existing account password or jobs data
     router.put('/', async (req, res) => {
@@ -22,6 +44,14 @@
         res.json(result)
       } else if (form === 'update-jobs' && newData.jobs) {
         const update = { $set: { jobs: newData.jobs }}
+        const result = await collection.findOneAndUpdate(filter, update, options)
+        res.json(result)
+      } else if (form === 'update-tasks' && newData.tasks) {
+        const update = { $set: { tasks: newData.tasks }}
+        const result = await collection.findOneAndUpdate(filter, update, options)
+        res.json(result)
+      } else if (form === 'update-notes' && newData.notes) {
+        const update = { $set: { notes: newData.notes }}
         const result = await collection.findOneAndUpdate(filter, update, options)
         res.json(result)
       } else {
