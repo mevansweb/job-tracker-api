@@ -4,13 +4,14 @@
 
     const options = { returnDocument: 'after' } // Return the updated document
     
-    router.get('/search/:id/:searchTerm', async (req, res) => {   
+    router.get('/search/:id/:searchTerm/:searchType', async (req, res) => {   
       const collection = req.collection
-      const { id, searchTerm } = req.params
+      const { id, searchTerm, searchType = 'company' } = req.params
+ 
       const data = await collection.find(
         { 
         _id: new ObjectId(id),
-        'jobs.company': { $regex: searchTerm, $options: 'i' }
+        [`jobs.${searchType}`]: { $regex: searchTerm, $options: 'i' }
         },
         {
           projection: {
@@ -19,18 +20,20 @@
               $filter: {
                 input: '$jobs',
                 as: 'job',
-                cond: { $regexMatch: { input: '$$job.company', regex: searchTerm, options: 'i' } }
+                cond: { $regexMatch: { input: `$$job.${searchType}`, regex: searchTerm, options: 'i' } }
               }
             }
           }
         }
       ).toArray()
+      
       if (data[0] && data[0].jobs) {
         res.json(data[0].jobs)
       } else {
         res.json([])
       }
     })
+
     // Update existing account password or jobs data
     router.put('/', async (req, res) => {
       const collection = req.collection
