@@ -57,6 +57,10 @@
         const update = { $set: { notes: newData.notes }}
         const result = await collection.findOneAndUpdate(filter, update, options)
         res.json(result)
+      } else if (form === 'update-resume' && newData.resume) {
+        const update = { $set: { resume: newData.resume }}
+        const result = await collection.findOneAndUpdate(filter, update, options)
+        res.json(result)
       } else if (form === 'update-settings' && newData.settings) {
         const update = { $set: { settings: newData.settings }}
         const result = await collection.findOneAndUpdate(filter, update, options)
