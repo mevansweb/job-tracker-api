@@ -4,6 +4,36 @@
 
     const options = { returnDocument: 'after' } // Return the updated document
     
+    router.get('/application/:id/:applicationId', async (req, res) => {   
+      const collection = req.collection
+      const { applicationId, id } = req.params
+ 
+      const data = await collection.find(
+        { 
+        _id: new ObjectId(id),
+        ['jobs.id']: { $regex: applicationId, $options: 'i' }
+        },
+        {
+          projection: {
+            _id: 1,
+            jobs: {
+              $filter: {
+                input: '$jobs',
+                as: 'job',
+                cond: { $regexMatch: { input: `$$job.id`, regex: applicationId, options: 'i' } }
+              }
+            }
+          }
+        }
+      ).toArray()
+      
+      if (data[0] && data[0].jobs) {
+        res.json(data[0].jobs)
+      } else {
+        res.json([])
+      }
+    })
+    
     router.get('/search/:id/:searchTerm/:searchType', async (req, res) => {   
       const collection = req.collection
       const { id, searchTerm, searchType = 'company' } = req.params
